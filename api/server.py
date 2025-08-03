@@ -16,9 +16,9 @@ import logging
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-from utils.logging_system import RedshiftLogger
+from core.logging_system import RedshiftManagerLogger as RedshiftLogger
 from api.main import app
-from api.middleware import setup_all_middleware
+# from api.middleware import setup_all_middleware
 
 class APIServer:
     """
@@ -33,7 +33,7 @@ class APIServer:
         self.server: Optional[uvicorn.Server] = None
         
         # Setup middleware
-        setup_all_middleware(app, self.logger)
+        # setup_all_middleware(app, self.logger)
         
         # Setup signal handlers
         signal.signal(signal.SIGINT, self._signal_handler)
