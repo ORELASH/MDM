@@ -1,0 +1,40 @@
+# MultiDBManager - Minimal Requirements for Quick Start
+# Core Dependencies only
+
+# Core Framework
+streamlit>=1.28.0,<2.0.0
+streamlit-option-menu>=0.3.6
+
+# Database & ORM  
+SQLAlchemy>=2.0.0,<3.0.0
+psycopg2-binary>=2.9.7
+
+# MySQL (without problematic mysqlclient)
+PyMySQL>=1.1.0
+
+# Security & Encryption
+cryptography>=41.0.0
+bcrypt>=4.0.0
+
+# Data Processing
+pandas>=2.0.0,<3.0.0
+plotly>=5.15.0
+
+# Configuration
+pyyaml>=6.0
+
+# HTTP & Requests
+requests>=2.31.0
+
+# LDAP Integration
+ldap3>=2.9.1
+
+# Redis Support
+redis>=4.5.0
+
+# Utilities
+click>=8.1.0
+python-dateutil>=2.8.0
+
+# Validation
+pydantic>=2.0.0,<3.0.0

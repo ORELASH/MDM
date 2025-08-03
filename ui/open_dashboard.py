@@ -16,6 +16,10 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+
+# Import translations
+sys.path.append(str(Path(__file__).parent.parent))
+from config.ui_translations import translate, get_available_languages, is_rtl_language
 try:
     import ldap3
     from ldap3 import Server, Connection, ALL, NTLM
@@ -1847,15 +1851,45 @@ st.set_page_config(
 def show_sidebar():
     """Show sidebar with navigation"""
     st.sidebar.title("🔧 MultiDBManager")
-    st.sidebar.markdown("### Universal Multi-Database Management Tool")
+    
+    # Language selector
+    st.sidebar.markdown("### 🌐 Language / שפה")
+    available_languages = get_available_languages()
+    language_options = list(available_languages.keys())
+    
+    # Initialize language in session state if not exists
+    if 'selected_language' not in st.session_state:
+        st.session_state.selected_language = "English"
+    
+    selected_language = st.sidebar.selectbox(
+        "Select Language:",
+        language_options,
+        index=language_options.index(st.session_state.selected_language),
+        key="language_selector"
+    )
+    
+    # Update session state
+    st.session_state.selected_language = selected_language
+    
+    # Apply RTL layout if needed
+    if is_rtl_language(selected_language):
+        st.markdown("""
+        <style>
+        .main .block-container {
+            direction: rtl;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+    
+    st.sidebar.markdown(translate("### Universal Multi-Database Management Tool", selected_language))
     st.sidebar.markdown("---")
 
     # Navigation
-    st.sidebar.markdown("### 📋 Navigation")
+    st.sidebar.markdown(f"### 📋 {translate('Navigation', selected_language)}")
 
     pages = [
         "📊 Dashboard",
-        "🖥️ Server Management",
+        "🖥️ Server Management", 
         "👥 User Management",
         "🌐 Global Users",
         "💾 Local User Storage",
@@ -1869,14 +1903,25 @@ def show_sidebar():
         "⚙️ Settings",
     ]
 
-    selected_page = st.sidebar.radio("Select Page:", pages, index=0)
+    # Translate page names
+    translated_pages = [translate(page, selected_language) for page in pages]
+    
+    selected_page_index = st.sidebar.radio(
+        translate("Select Page:", selected_language), 
+        range(len(translated_pages)),
+        format_func=lambda x: translated_pages[x],
+        index=0
+    )
+    
+    # Return original English page name for routing
+    selected_page = pages[selected_page_index]
 
     # System info
     st.sidebar.markdown("---")
-    st.sidebar.markdown("### ℹ️ System Info")
-    st.sidebar.markdown("**Status:** 🟢 Online")
-    st.sidebar.markdown("**Version:** 1.0.0")
-    st.sidebar.markdown("**Mode:** Open Access")
+    st.sidebar.markdown(f"### ℹ️ {translate('System Info', selected_language)}")
+    st.sidebar.markdown(f"**{translate('Status', selected_language)}:** 🟢 {translate('Online', selected_language)}")
+    st.sidebar.markdown(f"**{translate('Version', selected_language)}:** 3.0.0")
+    st.sidebar.markdown(f"**{translate('Mode', selected_language)}:** {translate('Open Access', selected_language)}")
 
     return selected_page
 
@@ -1886,8 +1931,11 @@ def show_dashboard_page():
     log_user_action("page_view", "system", page="dashboard")
     logger.info("Dashboard page accessed")
     
-    st.title("📊 MultiDBManager Dashboard")
-    st.markdown("### System Overview and Monitoring")
+    # Get selected language from session state
+    selected_language = st.session_state.get('selected_language', 'English')
+    
+    st.title(translate("📊 MultiDBManager Dashboard", selected_language))
+    st.markdown(f"### {translate('System Overview and Monitoring', selected_language)}")
     st.markdown("---")
 
     # Status cards
@@ -2079,8 +2127,11 @@ def show_dashboard_page():
 
 def show_server_management_page():
     """Show Server Management page with full functionality"""
-    st.title("🖥️ Server Management")
-    st.markdown("### Database Server Connection Management")
+    # Get selected language from session state
+    selected_language = st.session_state.get('selected_language', 'English')
+    
+    st.title(translate("🖥️ Server Management", selected_language))
+    st.markdown(f"### {translate('Database Server Connection Management', selected_language)}")
     st.markdown("---")
 
     # Server management tabs
@@ -2093,7 +2144,7 @@ def show_server_management_page():
     )
 
     with tab1:
-        st.subheader("📋 Registered Servers")
+        st.subheader(translate("📋 Registered Servers"))
 
         # Load servers from file or initialize with defaults
         def load_servers():
@@ -4138,7 +4189,7 @@ def show_server_management_page():
                 st.info("Performance report would generate here")
 
     with tab2:
-        st.subheader("➕ Add New Server")
+        st.subheader(translate("➕ Add New Server"))
 
         # Database type templates
         st.markdown("#### 🎯 Quick Templates")
@@ -5046,8 +5097,8 @@ def show_user_management_page():
         pass
     
     # Basic fallback implementation
-    st.title("👥 User Management")
-    st.markdown("### Database Users and Permissions Management")
+    st.title(translate("👥 User Management"))
+    st.markdown("### ניהול משתמשי מסד נתונים והרשאות")
     st.markdown("---")
     
     st.info("🔧 Advanced user management interface is loading. If you see this message, the system is using a simplified fallback.")

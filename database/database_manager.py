@@ -154,6 +154,57 @@ class DatabaseManager:
             
             return servers
     
+    def get_all_servers(self) -> List[Dict[str, Any]]:
+        """Alias for get_servers() for backward compatibility"""
+        return self.get_servers()
+    
+    def get_latest_scan_results(self, server_id: int) -> Dict[str, Any]:
+        """Get latest scan results for a server"""
+        with self.get_cursor() as cursor:
+            # Get latest scan
+            cursor.execute("""
+                SELECT * FROM scan_history 
+                WHERE server_id = ? 
+                ORDER BY created_at DESC 
+                LIMIT 1
+            """, (server_id,))
+            
+            scan = cursor.fetchone()
+            if not scan:
+                return {"users": [], "roles": [], "tables": []}
+            
+            scan_dict = dict(scan)
+            
+            # Parse scan results if stored as JSON
+            if scan_dict.get('scan_results'):
+                try:
+                    import json
+                    results = json.loads(scan_dict['scan_results'])
+                    return results
+                except:
+                    pass
+            
+            # If no JSON results, get from individual tables
+            # Get users for this server
+            cursor.execute("SELECT * FROM users WHERE server_id = ?", (server_id,))
+            users = [dict(row) for row in cursor.fetchall()]
+            
+            # Get roles for this server
+            cursor.execute("SELECT * FROM roles WHERE server_id = ?", (server_id,))
+            roles = [dict(row) for row in cursor.fetchall()]
+            
+            # Get tables for this server
+            cursor.execute("SELECT * FROM tables WHERE server_id = ?", (server_id,))
+            tables = [dict(row) for row in cursor.fetchall()]
+            
+            return {
+                "users": users,
+                "roles": roles, 
+                "tables": tables,
+                "scan_id": scan_dict.get('id'),
+                "scan_date": scan_dict.get('created_at')
+            }
+    
     def update_server_status(self, server_id: int, status: str, last_test_at: Optional[datetime] = None):
         """Update server connection status"""
         with self.get_cursor() as cursor:
