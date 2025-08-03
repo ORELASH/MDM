@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "server_name": "postgresql-server",
+    "server_host": "localhost",
+    "server_port": 5432,
+    "database_type": "postgresql",
+    "created_at": "2025-08-03T17:30:00.360585",
+    "version": 1
+  },
+  "connection_info": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "postgres",
+    "environment": "Development",
+    "status": "🟢 Connected",
+    "last_test": "Just now",
+    "last_scan": "Just now"
+  },
+  "scan_results": {
+    "tables": [
+      {
+        "name": "Error: schema \"test\" does not exist\n",
+        "rows": 0,
+        "size": "N/A"
+      }
+    ],
+    "users": [
+      {
+        "name": "Connection failed",
+        "type": "error",
+        "active": false
+      }
+    ],
+    "roles": [
+      {
+        "name": "Connection failed",
+        "members": 0
+      }
+    ],
+    "database_type": "postgresql",
+    "total_size": 0
+  },
+  "session_history": {
+    "operations_count": 1,
+    "last_activity": "2025-08-03T17:30:00.361581",
+    "scan_duration": "N/A"
+  }
+}

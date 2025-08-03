@@ -21,9 +21,14 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 import json
 
+# Import routers
+from api.routers.database import router as database_router
+from api.routers.servers import router as servers_router
+from api.routers.users import router as users_router
+
 # Initialize logger (simple fallback)
 try:
-    from utils_backup.logging_system import RedshiftLogger
+    from core.logging_system import RedshiftManagerLogger as RedshiftLogger
     logger = RedshiftLogger()
 except:
     import logging
@@ -44,9 +49,9 @@ class SystemInfo(BaseModel):
 
 # Create FastAPI app
 app = FastAPI(
-    title="RedshiftManager API",
-    description="Simple REST API for Amazon Redshift Management - Open Access",
-    version="1.0.0",
+    title="MultiDBManager API",
+    description="Universal Multi-Database Management REST API - Open Access",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json"
@@ -70,9 +75,9 @@ async def root():
     """
     return APIResponse(
         success=True,
-        message="RedshiftManager API is running (Open Access Mode)",
+        message="MultiDBManager API is running (Open Access Mode)",
         data={
-            "version": "1.0.0",
+            "version": "2.0.0",
             "status": "healthy",
             "mode": "open_access",
             "authentication": False,
@@ -80,7 +85,10 @@ async def root():
                 "/docs",
                 "/health",
                 "/system/info",
-                "/system/status"
+                "/system/status",
+                "/database/*",
+                "/servers/*",
+                "/users/*"
             ]
         }
     )
@@ -134,6 +142,11 @@ async def get_system_status():
         logger.error(f"Failed to get system status: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve system status")
 
+# Include routers
+app.include_router(database_router)
+app.include_router(servers_router)
+app.include_router(users_router)
+
 # Error handlers
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
@@ -169,10 +182,14 @@ async def startup_event():
     """
     Application startup event
     """
-    print("🚀 RedshiftManager API Server Started (Open Access Mode)")
+    print("🚀 MultiDBManager API Server Started (Open Access Mode)")
     print("📚 API Documentation: http://localhost:8000/docs")
     print("🔄 Alternative Docs: http://localhost:8000/redoc")
     print("🔓 Authentication: Disabled")
+    print("🔗 Available Endpoints:")
+    print("   • /database/* - Database operations")
+    print("   • /servers/* - Server management")
+    print("   • /users/* - User management")
 
 # Shutdown event
 @app.on_event("shutdown")
@@ -180,7 +197,7 @@ async def shutdown_event():
     """
     Application shutdown event
     """
-    print("⏹️ RedshiftManager API Server Stopped")
+    print("⏹️ MultiDBManager API Server Stopped")
 
 if __name__ == "__main__":
     # Development server
