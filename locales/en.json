@@ -1,0 +1,19 @@
+{
+  "app": {
+    "title": "RedshiftManager",
+    "subtitle": "Amazon Redshift Management Tool",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning"
+  },
+  "navigation": {
+    "home": "Home",
+    "clusters": "Clusters", 
+    "users": "Users",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "reports": "Reports",
+    "settings": "Settings"
+  }
+}

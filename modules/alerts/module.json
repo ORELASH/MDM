@@ -1,0 +1,79 @@
+{
+  "name": "alert_system",
+  "display_name": "Alert & Notification System",
+  "version": "1.0.0",
+  "description": "Real-time monitoring and alerting system for RedshiftManager with email notifications, system monitoring, and custom alert rules",
+  "author": "RedshiftManager Team",
+  "category": "monitoring",
+  "priority": 8,
+  "enabled": false,
+  "dependencies": [],
+  "permissions": ["system_monitoring", "email_access", "file_system"],
+  "config_schema": {
+    "email_notifications": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable email notifications for alerts"
+    },
+    "sms_notifications": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable SMS notifications for critical alerts"
+    },
+    "smtp_server": {
+      "type": "string",
+      "default": "smtp.gmail.com",
+      "description": "SMTP server for email notifications"
+    },
+    "smtp_port": {
+      "type": "integer",
+      "default": 587,
+      "description": "SMTP server port"
+    },
+    "from_email": {
+      "type": "string",
+      "default": "",
+      "description": "Email address to send notifications from"
+    },
+    "alert_threshold_cpu": {
+      "type": "integer",
+      "default": 80,
+      "description": "CPU usage threshold for alerts (percentage)"
+    },
+    "alert_threshold_memory": {
+      "type": "integer",
+      "default": 85,
+      "description": "Memory usage threshold for alerts (percentage)"
+    },
+    "alert_threshold_disk": {
+      "type": "integer",
+      "default": 90,
+      "description": "Disk usage threshold for alerts (percentage)"
+    },
+    "check_interval_minutes": {
+      "type": "integer",
+      "default": 5,
+      "description": "Interval between system checks in minutes"
+    },
+    "escalation_delay_minutes": {
+      "type": "integer",
+      "default": 15,
+      "description": "Minutes to wait before escalating unresolved alerts"
+    },
+    "max_alerts_per_hour": {
+      "type": "integer",
+      "default": 10,
+      "description": "Maximum number of alerts to send per hour to prevent spam"
+    },
+    "alert_retention_days": {
+      "type": "integer",
+      "default": 30,
+      "description": "Number of days to keep alert history"
+    }
+  },
+  "entry_point": "alert_manager.AlertManager",
+  "ui_components": {
+    "main_panel": "alert_ui.AlertPanel",
+    "settings_panel": "alert_ui.AlertSettings"
+  }
+}

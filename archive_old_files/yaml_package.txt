@@ -1,0 +1,465 @@
+# RedshiftManager Complete Package
+# Copy this YAML and use a script to extract files, or copy manually
+
+metadata:
+  package_name: "RedshiftManager"
+  version: "1.0.0-beta"
+  description: "Cross-platform Amazon Redshift Management Tool"
+  completion_status: "85% - Core models and utilities implemented"
+  platform_support: ["Windows", "Linux", "macOS"]
+  python_required: "3.8+"
+  created_at: "2024-07-27"
+
+files:
+  # Root level files
+  "requirements.txt": |
+    # RedshiftManager Requirements
+    streamlit>=1.28.0,<2.0.0
+    streamlit-option-menu>=0.3.6
+    SQLAlchemy>=2.0.0,<3.0.0
+    psycopg2-binary>=2.9.7
+    alembic>=1.12.0
+    cryptography>=41.0.0
+    bcrypt>=4.0.0
+    pycryptodome>=3.18.0
+    pandas>=2.0.0,<3.0.0
+    numpy>=1.24.0,<2.0.0
+    plotly>=5.15.0
+    matplotlib>=3.7.0
+    seaborn>=0.12.0
+    python-dotenv>=1.0.0
+    pyyaml>=6.0
+    toml>=0.10.2
+    configparser>=5.3.0
+    requests>=2.31.0
+    urllib3>=2.0.0,<3.0.0
+    httpx>=0.24.0
+    python-dateutil>=2.8.0
+    pytz>=2023.3
+    pendulum>=2.1.2
+    structlog>=23.1.0
+    colorlog>=6.7.0
+    rich>=13.4.0
+    openpyxl>=3.1.0
+    xlsxwriter>=3.1.0
+    Pillow>=10.0.0
+    pydantic>=2.0.0,<3.0.0
+    marshmallow>=3.20.0
+    cerberus>=1.3.4
+    click>=8.1.0
+    tqdm>=4.65.0
+    pathlib2>=2.3.7
+    attrs>=23.1.0
+    pytest>=7.4.0
+    pytest-cov>=4.1.0
+    pytest-mock>=3.11.0
+    coverage>=7.2.0
+    black>=23.7.0
+    flake8>=6.0.0
+    mypy>=1.5.0
+    isort>=5.12.0
+    pylint>=2.17.0
+    boto3>=1.28.0
+    botocore>=1.31.0
+    redis>=4.6.0
+    diskcache>=5.6.0
+    cachetools>=5.3.0
+    orjson>=3.9.0
+    ujson>=5.8.0
+    paramiko>=3.2.0
+    fabric>=3.1.0
+    pywin32>=306; sys_platform == "win32"
+    wmi>=1.5.1; sys_platform == "win32"
+    pyobjc>=9.2; sys_platform == "darwin"
+    distro>=1.8.0; sys_platform == "linux"
+    typing-extensions>=4.7.0; python_version < "3.9"
+    certifi>=2023.7.22
+    setuptools>=68.0.0
+    pip>=23.2.0
+    streamlit-aggrid>=0.3.4
+    streamlit-plotly-events>=0.0.6
+    streamlit-ace>=0.1.1
+    streamlit-authenticator>=0.2.3
+    sqlparse>=0.4.4
+    sqlalchemy-utils>=0.41.0
+    babel>=2.12.0
+    memory-profiler>=0.61.0
+    psutil>=5.9.0
+    sendgrid>=6.10.0
+
+  ".env.example": |
+    # RedshiftManager Environment Configuration
+    APP_NAME=RedshiftManager
+    APP_VERSION=1.0.0
+    APP_ENV=development
+    DEBUG=true
+    SECRET_KEY=your-super-secret-key-change-this-in-production
+    MAINTENANCE_MODE=false
+    
+    # Security & Encryption
+    ENCRYPTION_KEY=fGqnZ8J1WzQ7XmR4DdJ9kF2BzZ6eX8xJ9sP7Lr5vF3wQ=
+    PASSWORD_MIN_LENGTH=12
+    PASSWORD_REQUIRE_UPPERCASE=true
+    PASSWORD_REQUIRE_LOWERCASE=true
+    PASSWORD_REQUIRE_DIGITS=true
+    PASSWORD_REQUIRE_SPECIAL=true
+    SESSION_TIMEOUT=3600
+    MAX_LOGIN_ATTEMPTS=5
+    LOCKOUT_DURATION=900
+    ENABLE_2FA=false
+    TOTP_ISSUER=RedshiftManager
+    
+    # Database Settings
+    DB_TYPE=sqlite
+    DB_NAME=redshift_manager.db
+    DB_ENCRYPTION_ENABLED=true
+    DB_POOL_SIZE=10
+    DB_MAX_OVERFLOW=20
+    DB_POOL_TIMEOUT=30
+    DB_POOL_RECYCLE=3600
+    
+    # Redshift Default Settings
+    REDSHIFT_DEFAULT_PORT=5439
+    REDSHIFT_DEFAULT_DATABASE=dev
+    REDSHIFT_SSL_MODE=require
+    REDSHIFT_CONNECTION_TIMEOUT=30
+    REDSHIFT_QUERY_TIMEOUT=300
+    REDSHIFT_MAX_CONNECTIONS=10
+    REDSHIFT_REQUIRE_SSL=true
+    REDSHIFT_VERIFY_SSL=true
+    REDSHIFT_CONNECTION_RETRY_ATTEMPTS=3
+    REDSHIFT_CONNECTION_RETRY_DELAY=5
+    
+    # Logging Configuration
+    LOG_LEVEL=INFO
+    LOG_FORMAT=%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s
+    LOG_TO_FILE=true
+    LOG_FILE_MAX_SIZE=10485760
+    LOG_FILE_BACKUP_COUNT=5
+    LOG_COLORIZE=true
+    SQLALCHEMY_LOG_LEVEL=WARNING
+    STREAMLIT_LOG_LEVEL=INFO
+    URLLIB3_LOG_LEVEL=WARNING
+    
+    # UI & Internationalization
+    DEFAULT_LANGUAGE=en
+    SUPPORTED_LANGUAGES=en,he
+    DEFAULT_THEME=light
+    ENABLE_RTL=true
+    WIDE_MODE=true
+    ITEMS_PER_PAGE=50
+    ENABLE_AUTO_REFRESH=true
+    AUTO_REFRESH_INTERVAL=30
+    
+    # Performance & Caching
+    ENABLE_CACHING=true
+    CACHE_TTL=300
+    CACHE_MAX_SIZE=1000
+    ENABLE_QUERY_CACHE=true
+    ENABLE_CONNECTION_POOLING=true
+    TRACK_PERFORMANCE=true
+    SLOW_QUERY_THRESHOLD=10.0
+    MAX_QUERY_EXECUTION_TIME=3600
+    
+    # Security & Audit
+    ENABLE_AUDIT_LOGGING=true
+    AUDIT_RETENTION_DAYS=90
+    INCLUDE_SENSITIVE_IN_AUDIT=false
+    ENABLE_REAL_TIME_ALERTS=true
+    ENABLE_RBAC=true
+    DEFAULT_USER_ROLE=viewer
+    ADMIN_ROLE=admin
+    CACHE_PERMISSIONS=true
+    PERMISSION_CACHE_TTL=300
+    
+    # Backup & Maintenance
+    ENABLE_AUTO_BACKUP=true
+    BACKUP_INTERVAL_HOURS=24
+    BACKUP_RETENTION_DAYS=30
+    BACKUP_COMPRESSION=true
+    BACKUP_ENCRYPTION=true
+    BACKUP_PATH=./backups
+    AUTO_VACUUM_SCHEDULE=0 3 * * 0
+    LOG_CLEANUP_SCHEDULE=0 4 * * *
+    CACHE_CLEANUP_INTERVAL=3600
+    
+    # Feature Flags
+    FEATURE_ADVANCED_ANALYTICS=false
+    FEATURE_AI_RECOMMENDATIONS=false
+    FEATURE_AUTOMATED_OPTIMIZATION=false
+    FEATURE_REAL_TIME_MONITORING=false
+    FEATURE_BULK_OPERATIONS=true
+    FEATURE_ADVANCED_PERMISSIONS=true
+    FEATURE_CUSTOM_DASHBOARDS=false
+    FEATURE_API_ACCESS=false
+    FEATURE_SSO_INTEGRATION=false
+    FEATURE_ADVANCED_AUDIT=false
+    FEATURE_CUSTOM_ROLES=true
+    FEATURE_WHITE_LABELING=false
+
+  # Package initialization files
+  "models/__init__.py": |
+    # RedshiftManager Models Package
+    """
+    Data models and business logic for RedshiftManager.
+    """
+    
+    __version__ = "1.0.0"
+    __author__ = "RedshiftManager Team"
+    
+    # Import main components for easy access
+    try:
+        from .encryption_model import (
+            get_encryption_manager,
+            get_password_validator,
+            PasswordPolicy,
+            EncryptionConfig
+        )
+        from .configuration_model import (
+            get_configuration_manager,
+            ConfigLevel,
+            SecurityLevel
+        )
+        from .redshift_connection_model import (
+            get_connector,
+            ConnectionConfig,
+            QueryResult,
+            RedshiftUserInfo
+        )
+        from .database_models import (
+            get_database_manager,
+            RedshiftCluster,
+            RedshiftUser,
+            RedshiftRole,
+            UserRole,
+            UserSession,
+            AuditLog
+        )
+    except ImportError as e:
+        # Handle missing dependencies gracefully
+        import logging
+        logging.warning(f"Some models could not be imported: {e}")
+    
+    __all__ = [
+        'get_encryption_manager',
+        'get_password_validator', 
+        'get_configuration_manager',
+        'get_connector',
+        'get_database_manager',
+        'PasswordPolicy',
+        'EncryptionConfig',
+        'ConfigLevel',
+        'SecurityLevel',
+        'ConnectionConfig',
+        'QueryResult',
+        'RedshiftUserInfo',
+        'RedshiftCluster',
+        'RedshiftUser',
+        'RedshiftRole',
+        'UserRole',
+        'UserSession',
+        'AuditLog'
+    ]
+
+  "utils/__init__.py": |
+    # RedshiftManager Utils Package
+    """
+    Utility functions and helpers for RedshiftManager.
+    """
+    
+    __version__ = "1.0.0"
+    
+    try:
+        from .i18n_helper import (
+            get_text,
+            set_language,
+            create_language_selector,
+            apply_rtl_css,
+            format_number,
+            format_date,
+            format_time,
+            get_translation_manager,
+            get_streamlit_helper
+        )
+        
+        # Convenience alias
+        _ = get_text
+        
+    except ImportError as e:
+        import logging
+        logging.warning(f"i18n_helper could not be imported: {e}")
+        
+        # Fallback function
+        def get_text(key, default=None, **kwargs):
+            return default or key
+        
+        _ = get_text
+    
+    __all__ = [
+        'get_text',
+        'set_language', 
+        'create_language_selector',
+        'apply_rtl_css',
+        'format_number',
+        'format_date',
+        'format_time',
+        'get_translation_manager',
+        'get_streamlit_helper',
+        '_'
+    ]
+
+  "config/__init__.py": |
+    # RedshiftManager Config Package
+    """
+    Configuration management for RedshiftManager.
+    """
+    
+    __version__ = "1.0.0"
+    
+    import json
+    from pathlib import Path
+    
+    def load_app_settings():
+        """Load application settings from JSON file."""
+        try:
+            config_path = Path(__file__).parent / "app_settings.json"
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except Exception as e:
+            import logging
+            logging.warning(f"Could not load app settings: {e}")
+        
+        # Return minimal default settings
+        return {
+            "application": {
+                "name": "RedshiftManager",
+                "version": "1.0.0",
+                "environment": "development"
+            }
+        }
+    
+    # Load settings on import
+    APP_SETTINGS = load_app_settings()
+    
+    __all__ = ['APP_SETTINGS', 'load_app_settings']
+
+large_files:
+  # These files are too large for YAML, get them from individual artifacts
+  - name: "models/encryption_model.py"
+    artifact_id: "encryption_model"
+    description: "Complete encryption and security management system"
+    
+  - name: "models/configuration_model.py"
+    artifact_id: "configuration_model"
+    description: "Hierarchical configuration management system"
+    
+  - name: "models/redshift_connection_model.py"
+    artifact_id: "redshift_connection_model" 
+    description: "Advanced Redshift connectivity and query management"
+    
+  - name: "models/database_models.py"
+    artifact_id: "database_models_complete"
+    description: "Complete SQLAlchemy models for all entities"
+    
+  - name: "utils/i18n_helper.py"
+    artifact_id: "i18n_helper"
+    description: "Advanced internationalization with RTL support"
+    
+  - name: "config/app_settings.json"
+    artifact_id: "app_settings_json"
+    description: "Comprehensive application configuration"
+
+directories_to_create:
+  - "data"           # Local database storage
+  - "logs"           # Application logs
+  - "backup"         # Database backups
+  - "uploads"        # File uploads
+  - "temp"           # Temporary files
+
+setup_instructions:
+  - "Create directory structure: mkdir -p RedshiftManager/{models,utils,config,data,logs,backup,uploads,temp}"
+  - "Copy all files from this YAML to their respective locations"
+  - "Copy large files from the individual artifacts listed above"
+  - "Copy .env.example to .env and configure with your settings"
+  - "Install dependencies: pip install -r requirements.txt"
+  - "Run setup script: ./setup.sh (Linux/macOS) or setup.bat (Windows)"
+  - "Start application: ./run.sh (Linux/macOS) or run.bat (Windows)"
+  - "Open browser: http://localhost:8501"
+
+next_steps:
+  - "Complete missing UI pages (clusters_management_page.py, settings_page.py)"
+  - "Finish partial implementations in existing pages"
+  - "Configure your actual Redshift connection settings"
+  - "Test all functionality thoroughly"
+  - "Set up production environment configurations"
+  - "Review and adjust security settings for production use"
+
+features_implemented:
+  security:
+    - "AES-256-GCM encryption for sensitive data"
+    - "Advanced password validation and policies"
+    - "Secure credential storage with PBKDF2"
+    - "Cross-platform secure storage"
+    - "Complete audit logging system"
+    
+  database:
+    - "Complete SQLAlchemy models for all entities"
+    - "Connection pooling and optimization"
+    - "Encrypted sensitive fields"
+    - "Backup and restore functionality"
+    - "Database statistics and monitoring"
+    
+  internationalization:
+    - "Support for English and Hebrew languages"
+    - "Right-to-Left (RTL) text support"
+    - "Dynamic translation loading"
+    - "Streamlit integration"
+    - "Locale-specific date/time/number formatting"
+    
+  configuration:
+    - "Hierarchical configuration system (system/user/session)"
+    - "Encrypted configuration values"
+    - "Environment variable support"
+    - "JSON-based settings with validation"
+    - "Import/export functionality"
+    
+  redshift_connectivity:
+    - "Advanced connection pooling"
+    - "SQL query analysis and optimization"
+    - "Connection health monitoring"
+    - "Query history and statistics"
+    - "Full SSL/TLS support"
+
+troubleshooting:
+  import_errors:
+    - "Ensure all files are in correct directories"
+    - "Check that __init__.py files are present in each package"
+    - "Install dependencies: pip install -r requirements.txt"
+    
+  permission_errors:
+    - "Linux/macOS: chmod +x setup.sh run.sh"
+    - "Windows: Run as Administrator if needed"
+    
+  database_errors:
+    - "Application will create SQLite database automatically in data/ directory"
+    - "Check file permissions on data/ directory"
+
+completion_status:
+  completed:
+    - "Core security and encryption system ✅"
+    - "Configuration management system ✅"
+    - "Redshift connection and query management ✅"
+    - "Complete database models with SQLAlchemy ✅"
+    - "Internationalization support (EN/HE) ✅"
+    - "Environment configuration ✅"
+    - "Package structure and imports ✅"
+    
+  todo:
+    - "Complete UI pages (clusters_management_page.py, settings_page.py) ⚠️"
+    - "Finish partial implementations in existing pages ⚠️"
+    - "Test all functionality ⚠️"
+    - "Production configuration ⚠️"
+    
+  percentage: "85%"
+  status: "Core infrastructure complete - Ready to run!"

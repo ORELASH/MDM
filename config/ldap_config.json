@@ -1,0 +1,33 @@
+{
+  "enabled": false,
+  "server": {
+    "host": "ldap://your-domain-controller.com",
+    "port": 389,
+    "use_ssl": false,
+    "use_tls": false
+  },
+  "auth": {
+    "bind_dn": "CN=service-account,OU=Users,DC=company,DC=com",
+    "password": "",
+    "auth_method": "SIMPLE"
+  },
+  "search": {
+    "base_dn": "OU=Users,DC=company,DC=com",
+    "user_filter": "(objectClass=user)",
+    "group_base_dn": "OU=Groups,DC=company,DC=com",
+    "group_filter": "(objectClass=group)"
+  },
+  "attributes": {
+    "username": "sAMAccountName",
+    "display_name": "displayName",
+    "email": "mail",
+    "groups": "memberOf",
+    "account_disabled": "userAccountControl",
+    "last_logon": "lastLogon"
+  },
+  "sync": {
+    "auto_sync": false,
+    "sync_interval_hours": 24,
+    "last_sync": null
+  }
+}

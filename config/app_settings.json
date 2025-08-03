@@ -1,0 +1,372 @@
+{
+  "application": {
+    "name": "RedshiftManager",
+    "version": "1.0.0-beta",
+    "description": "Cross-platform Amazon Redshift Management Tool",
+    "environment": "development",
+    "debug": true,
+    "maintenance_mode": false,
+    "api_version": "v1",
+    "build_number": "20240727001",
+    "release_date": "2024-07-27"
+  },
+  
+  "security": {
+    "encryption": {
+      "enabled": true,
+      "algorithm": "aes_256_gcm",
+      "key_rotation_days": 90,
+      "backup_keys": true,
+      "hardware_security": false
+    },
+    "password_policy": {
+      "min_length": 12,
+      "max_length": 128,
+      "require_uppercase": true,
+      "require_lowercase": true,
+      "require_digits": true,
+      "require_special": true,
+      "special_chars": "!@#$%^&*()_+-=[]{}|;:,.<>?",
+      "password_history": 10,
+      "password_expiry_days": 90,
+      "force_change_on_first_login": true
+    },
+    "authentication": {
+      "session_timeout": 3600,
+      "max_login_attempts": 5,
+      "lockout_duration": 900,
+      "enable_2fa": false,
+      "totp_issuer": "RedshiftManager",
+      "remember_me_duration": 2592000
+    },
+    "authorization": {
+      "enable_rbac": true,
+      "default_user_role": "viewer",
+      "admin_role": "admin",
+      "cache_permissions": true,
+      "permission_cache_ttl": 300
+    },
+    "audit": {
+      "enable_audit_logging": true,
+      "retention_days": 90,
+      "include_sensitive_in_audit": false,
+      "enable_real_time_alerts": true,
+      "log_query_text": true,
+      "log_connection_details": true
+    }
+  },
+  
+  "database": {
+    "primary": {
+      "type": "sqlite",
+      "name": "redshift_manager.db",
+      "path": "./data/",
+      "encryption_enabled": true,
+      "backup_enabled": true
+    },
+    "postgresql": {
+      "host": "localhost",
+      "port": 5432,
+      "database": "redshift_manager",
+      "username": "postgres",
+      "password": "",
+      "ssl_mode": "prefer",
+      "connect_timeout": 30,
+      "application_name": "RedshiftManager"
+    },
+    "mysql": {
+      "host": "localhost",
+      "port": 3306,
+      "database": "redshift_manager",
+      "username": "root",
+      "password": "",
+      "charset": "utf8mb4",
+      "connect_timeout": 30,
+      "sql_mode": "STRICT_TRANS_TABLES",
+      "autocommit": false
+    },
+    "connection_pool": {
+      "pool_size": 10,
+      "max_overflow": 20,
+      "pool_timeout": 30,
+      "pool_recycle": 3600,
+      "pool_pre_ping": true
+    },
+    "performance": {
+      "enable_query_cache": true,
+      "query_cache_ttl": 300,
+      "slow_query_threshold": 10.0,
+      "max_query_execution_time": 3600,
+      "enable_connection_pooling": true
+    }
+  },
+  
+  "redshift": {
+    "defaults": {
+      "port": 5439,
+      "database": "dev",
+      "ssl_mode": "require",
+      "connection_timeout": 30,
+      "query_timeout": 300,
+      "max_connections": 10,
+      "require_ssl": true,
+      "verify_ssl": true
+    },
+    "connection": {
+      "retry_attempts": 3,
+      "retry_delay": 5,
+      "health_check_interval": 300,
+      "auto_reconnect": true,
+      "connection_lifetime": 3600
+    },
+    "query_execution": {
+      "default_limit": 1000,
+      "max_result_size": 10000000,
+      "enable_query_analysis": true,
+      "enable_query_optimization": true,
+      "auto_explain_threshold": 30
+    }
+  },
+  
+  "logging": {
+    "general": {
+      "level": "INFO",
+      "format": "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
+      "to_file": true,
+      "to_console": true,
+      "colorize": true
+    },
+    "files": {
+      "main_log": {
+        "filename": "logs/redshift_manager.log",
+        "max_size": 10485760,
+        "backup_count": 5,
+        "encoding": "utf-8"
+      },
+      "audit_log": {
+        "filename": "logs/audit.log",
+        "max_size": 52428800,
+        "backup_count": 10,
+        "encoding": "utf-8"
+      },
+      "query_log": {
+        "filename": "logs/queries.log",
+        "max_size": 104857600,
+        "backup_count": 5,
+        "encoding": "utf-8"
+      }
+    },
+    "component_levels": {
+      "sqlalchemy": "WARNING",
+      "streamlit": "INFO",
+      "urllib3": "WARNING",
+      "requests": "WARNING",
+      "psycopg2": "WARNING"
+    }
+  },
+  
+  "ui": {
+    "streamlit": {
+      "page_title": "RedshiftManager",
+      "page_icon": "🗄️",
+      "layout": "wide",
+      "initial_sidebar_state": "expanded",
+      "menu_items": {
+        "Get Help": null,
+        "Report a bug": null,
+        "About": "RedshiftManager v1.0.0 - Amazon Redshift Management Tool"
+      }
+    },
+    "theme": {
+      "default": "light",
+      "available_themes": ["light", "dark", "auto"],
+      "custom_css": true
+    },
+    "internationalization": {
+      "default_language": "en",
+      "supported_languages": ["en", "he"],
+      "enable_rtl": true,
+      "auto_detect_language": false,
+      "fallback_language": "en"
+    },
+    "components": {
+      "items_per_page": 50,
+      "enable_auto_refresh": true,
+      "auto_refresh_interval": 30,
+      "show_tooltips": true,
+      "enable_keyboard_shortcuts": true
+    },
+    "data_display": {
+      "max_rows_display": 1000,
+      "number_format": "auto",
+      "date_format": "auto",
+      "enable_data_export": true,
+      "export_formats": ["csv", "excel", "json"]
+    }
+  },
+  
+  "performance": {
+    "caching": {
+      "enable_caching": true,
+      "cache_ttl": 300,
+      "cache_max_size": 1000,
+      "cache_backend": "memory"
+    },
+    "monitoring": {
+      "track_performance": true,
+      "enable_profiling": false,
+      "performance_log_threshold": 1.0,
+      "memory_monitoring": true
+    },
+    "optimization": {
+      "enable_lazy_loading": true,
+      "batch_size": 100,
+      "parallel_connections": 5,
+      "connection_reuse": true
+    }
+  },
+  
+  "backup": {
+    "auto_backup": {
+      "enabled": true,
+      "interval_hours": 24,
+      "retention_days": 30,
+      "compression": true,
+      "encryption": true
+    },
+    "paths": {
+      "backup_directory": "./backup",
+      "temp_directory": "./temp",
+      "export_directory": "./exports"
+    },
+    "schedule": {
+      "database_backup": "0 3 * * *",
+      "log_cleanup": "0 4 * * *",
+      "cache_cleanup_interval": 3600
+    }
+  },
+  
+  "integrations": {
+    "aws": {
+      "enable_aws_integration": false,
+      "default_region": "us-east-1",
+      "enable_iam_authentication": false,
+      "enable_secrets_manager": false
+    },
+    "monitoring": {
+      "enable_metrics": false,
+      "metrics_endpoint": null,
+      "enable_health_checks": true,
+      "health_check_interval": 60
+    },
+    "notifications": {
+      "enable_email": false,
+      "smtp_server": null,
+      "smtp_port": 587,
+      "smtp_username": null,
+      "smtp_password": null,
+      "enable_slack": false,
+      "slack_webhook": null
+    }
+  },
+  
+  "features": {
+    "experimental": {
+      "advanced_analytics": false,
+      "ai_recommendations": false,
+      "automated_optimization": false,
+      "real_time_monitoring": false,
+      "custom_dashboards": false,
+      "api_access": false
+    },
+    "core": {
+      "bulk_operations": true,
+      "advanced_permissions": true,
+      "query_history": true,
+      "connection_management": true,
+      "user_management": true,
+      "audit_logging": true
+    },
+    "enterprise": {
+      "sso_integration": false,
+      "advanced_audit": false,
+      "custom_roles": true,
+      "white_labeling": false,
+      "high_availability": false,
+      "advanced_security": false
+    }
+  },
+  
+  "development": {
+    "debug_mode": true,
+    "enable_dev_tools": true,
+    "mock_data": false,
+    "test_mode": false,
+    "profiling": {
+      "enable_sql_profiling": false,
+      "enable_memory_profiling": false,
+      "profile_output_dir": "./profiles"
+    }
+  },
+  
+  "limits": {
+    "query": {
+      "max_query_length": 1000000,
+      "max_concurrent_queries": 10,
+      "max_result_rows": 100000,
+      "max_export_rows": 1000000
+    },
+    "connection": {
+      "max_connections_per_user": 5,
+      "max_clusters_per_user": 10,
+      "connection_idle_timeout": 1800
+    },
+    "file": {
+      "max_upload_size": 104857600,
+      "max_export_size": 1073741824,
+      "allowed_file_types": [".sql", ".csv", ".json", ".txt"]
+    }
+  },
+  
+  "paths": {
+    "data_directory": "./data",
+    "logs_directory": "./logs",
+    "backup_directory": "./backup",
+    "temp_directory": "./temp",
+    "uploads_directory": "./uploads",
+    "exports_directory": "./exports",
+    "translations_directory": "./translations",
+    "templates_directory": "./templates"
+  },
+  
+  "version_info": {
+    "schema_version": "1.0",
+    "config_version": "1.0",
+    "minimum_python_version": "3.8",
+    "supported_platforms": ["Windows", "Linux", "macOS"],
+    "dependencies": {
+      "streamlit": ">=1.28.0,<2.0.0",
+      "sqlalchemy": ">=2.0.0,<3.0.0",
+      "psycopg2-binary": ">=2.9.7",
+      "cryptography": ">=41.0.0",
+      "pandas": ">=2.0.0,<3.0.0"
+    }
+  },
+  
+  "maintenance": {
+    "maintenance_window": {
+      "enabled": false,
+      "start_time": "02:00",
+      "end_time": "04:00",
+      "timezone": "UTC",
+      "message": "System maintenance in progress. Please try again later."
+    },
+    "cleanup": {
+      "auto_cleanup_enabled": true,
+      "cleanup_schedule": "0 2 * * 0",
+      "temp_files_retention_hours": 24,
+      "log_retention_days": 90,
+      "session_cleanup_interval": 3600
+    }
+  }
+}

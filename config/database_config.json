@@ -1,0 +1,14 @@
+{
+  "database": {
+    "type": "sqlite",
+    "path": "data/redshift_manager.db",
+    "backup_enabled": true,
+    "backup_interval_hours": 24,
+    "backup_retention_days": 30
+  },
+  "migration": {
+    "completed": true,
+    "migration_date": "2025-08-03T10:49:46.744182",
+    "version": "1.0.0"
+  }
+}

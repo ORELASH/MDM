@@ -1,0 +1,81 @@
+# Test LDAP Structure for MultiDBManager
+# Base organizational units
+dn: ou=people,dc=multidb,dc=local
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=multidb,dc=local
+objectClass: organizationalUnit
+ou: groups
+
+# Test Users
+dn: cn=john.doe,ou=people,dc=multidb,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+cn: john.doe
+sn: Doe
+givenName: John
+displayName: John Doe
+uid: john.doe
+mail: john.doe@multidb.local
+userPassword: {SSHA}password123
+uidNumber: 1001
+gidNumber: 1001
+homeDirectory: /home/john.doe
+loginShell: /bin/bash
+
+dn: cn=jane.smith,ou=people,dc=multidb,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+cn: jane.smith
+sn: Smith
+givenName: Jane
+displayName: Jane Smith
+uid: jane.smith
+mail: jane.smith@multidb.local
+userPassword: {SSHA}password123
+uidNumber: 1002
+gidNumber: 1002
+homeDirectory: /home/jane.smith
+loginShell: /bin/bash
+
+dn: cn=admin.user,ou=people,dc=multidb,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+cn: admin.user
+sn: Admin
+givenName: Admin
+displayName: Admin User
+uid: admin.user
+mail: admin@multidb.local
+userPassword: {SSHA}admin123
+uidNumber: 1003
+gidNumber: 1003
+homeDirectory: /home/admin.user
+loginShell: /bin/bash
+
+# Test Groups
+dn: cn=db_admins,ou=groups,dc=multidb,dc=local
+objectClass: groupOfNames
+cn: db_admins
+description: Database Administrators
+member: cn=admin.user,ou=people,dc=multidb,dc=local
+
+dn: cn=db_users,ou=groups,dc=multidb,dc=local
+objectClass: groupOfNames
+cn: db_users
+description: Database Users
+member: cn=john.doe,ou=people,dc=multidb,dc=local
+member: cn=jane.smith,ou=people,dc=multidb,dc=local
+
+dn: cn=analysts,ou=groups,dc=multidb,dc=local
+objectClass: groupOfNames
+cn: analysts
+description: Data Analysts
+member: cn=jane.smith,ou=people,dc=multidb,dc=local
+
+dn: cn=developers,ou=groups,dc=multidb,dc=local
+objectClass: groupOfNames
+cn: developers
+description: Developers
+member: cn=john.doe,ou=people,dc=multidb,dc=local

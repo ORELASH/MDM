@@ -1,0 +1,10 @@
+{
+  "dashboard_layout": [],
+  "preferred_database": "",
+  "theme": "light",
+  "language": "en",
+  "auto_refresh": true,
+  "refresh_interval": 30,
+  "show_tooltips": true,
+  "compact_mode": false
+}

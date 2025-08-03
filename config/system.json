@@ -1,0 +1,35 @@
+{
+  "application": {
+    "name": "RedshiftManager",
+    "version": "1.0.0",
+    "environment": "development"
+  },
+  "security": {
+    "encryption_enabled": true,
+    "password_min_length": 12,
+    "session_timeout": 3600
+  },
+  "database": {
+    "type": "sqlite",
+    "name": "redshift_manager.db",
+    "host": "localhost",
+    "port": 3306,
+    "username": "root",
+    "password": "",
+    "database": "redshift_manager",
+    "charset": "utf8mb4"
+  },
+  "logging": {
+    "level": "INFO",
+    "to_file": true
+  },
+  "ui": {
+    "theme": "light",
+    "language": "en"
+  },
+  "redshift": {
+    "default_port": 5439,
+    "ssl_mode": "require",
+    "connection_timeout": 30
+  }
+}

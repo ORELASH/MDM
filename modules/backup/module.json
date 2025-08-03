@@ -1,0 +1,55 @@
+{
+  "name": "backup_module",
+  "display_name": "System Backup Manager",
+  "version": "1.0.0",
+  "description": "Comprehensive backup and restore system for RedshiftManager configurations, user preferences, and database connections",
+  "author": "RedshiftManager Team",
+  "category": "system",
+  "priority": 3,
+  "enabled": true,
+  "dependencies": [],
+  "permissions": ["file_system", "database_access"],
+  "config_schema": {
+    "backup_frequency": {
+      "type": "select",
+      "options": ["manual", "hourly", "daily", "weekly"],
+      "default": "daily",
+      "description": "Automatic backup frequency"
+    },
+    "backup_location": {
+      "type": "string",
+      "default": "./backup",
+      "description": "Directory to store backup files"
+    },
+    "compress_backups": {
+      "type": "boolean",
+      "default": true,
+      "description": "Compress backup files to save space"
+    },
+    "retention_days": {
+      "type": "integer",
+      "default": 30,
+      "description": "Number of days to keep backup files"
+    },
+    "include_user_data": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include user preferences and personal data in backups"
+    },
+    "include_logs": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include system logs in backups"
+    },
+    "encrypt_backups": {
+      "type": "boolean",
+      "default": false,
+      "description": "Encrypt backup files for security"
+    }
+  },
+  "entry_point": "backup_manager.BackupManager",
+  "ui_components": {
+    "main_panel": "backup_ui.BackupPanel",
+    "settings_panel": "backup_ui.BackupSettings"
+  }
+}

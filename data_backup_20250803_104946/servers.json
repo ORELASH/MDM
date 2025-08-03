@@ -1,0 +1,25 @@
+[
+  {
+    "Name": "postgresql-server",
+    "Host": "localhost",
+    "Port": 5432,
+    "Database": "postgres",
+    "Username": "postgres",
+    "Password": "123456",
+    "Environment": "Development",
+    "Status": "🟢 Connected",
+    "Last Test": "Just now",
+    "last_scan": "Just now",
+    "scanner_settings": {
+      "enabled": false,
+      "scan_interval": 24,
+      "detect_manual_users": true,
+      "alert_on_new_users": true,
+      "auto_lock_manual_users": false,
+      "alert_email": "",
+      "scan_tables": true,
+      "scan_users": true,
+      "scan_roles": true
+    }
+  }
+]

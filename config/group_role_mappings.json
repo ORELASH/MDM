@@ -1,0 +1,51 @@
+{
+  "version": "1.0",
+  "created_at": "2025-08-01T15:36:09.995172",
+  "mappings": {
+    "postgresql": {},
+    "mysql": {},
+    "redshift": {},
+    "global": {}
+  },
+  "templates": {
+    "data_analyst": {
+      "description": "Basic data analyst permissions",
+      "roles": [
+        "readonly",
+        "connect"
+      ],
+      "permissions": [
+        "SELECT"
+      ]
+    },
+    "data_engineer": {
+      "description": "Data engineering permissions",
+      "roles": [
+        "readwrite",
+        "connect"
+      ],
+      "permissions": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    "admin": {
+      "description": "Administrative permissions",
+      "roles": [
+        "superuser",
+        "admin"
+      ],
+      "permissions": [
+        "ALL"
+      ]
+    }
+  },
+  "settings": {
+    "auto_assign_roles": true,
+    "create_missing_roles": false,
+    "case_sensitive": false,
+    "sync_on_ldap_update": true
+  }
+}

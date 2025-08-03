@@ -1,0 +1,76 @@
+# MultiDBManager Requirements
+# Core Dependencies for Universal Multi-Database Management Tool
+
+# Core Framework
+streamlit>=1.28.0,<2.0.0
+streamlit-option-menu>=0.3.6
+
+# Database & ORM
+SQLAlchemy>=2.0.0,<3.0.0
+psycopg2-binary>=2.9.7
+alembic>=1.12.0
+
+# PostgreSQL specific
+psycopg2>=2.9.7
+asyncpg>=0.28.0
+
+# MySQL specific
+PyMySQL>=1.1.0
+mysqlclient>=2.2.0
+
+# Security & Encryption
+cryptography>=41.0.0
+bcrypt>=4.0.0
+PyJWT>=2.8.0
+
+# Data Processing & Analysis
+pandas>=2.0.0,<3.0.0
+numpy>=1.24.0,<2.0.0
+plotly>=5.15.0
+matplotlib>=3.7.0
+
+# Configuration & Environment
+pyyaml>=6.0
+
+# HTTP & API
+requests>=2.31.0
+urllib3>=2.0.0,<3.0.0
+fastapi>=0.104.0
+uvicorn>=0.24.0
+
+# Date & Time
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# Utilities
+click>=8.1.0
+tqdm>=4.65.0
+attrs>=23.1.0
+
+# Validation & Parsing
+pydantic>=2.0.0,<3.0.0
+
+# Streamlit Components
+streamlit-aggrid>=0.3.4
+
+# SQL Tools
+sqlparse>=0.4.4
+sqlalchemy-utils>=0.41.0
+
+# LDAP Integration
+ldap3>=2.9.1
+
+# Redis Support
+redis>=4.5.0
+
+# Performance
+cachetools>=5.3.0
+
+# Platform Specific
+pywin32>=306; sys_platform == "win32"
+distro>=1.8.0; sys_platform == "linux"
+
+# Security Updates
+certifi>=2023.7.22
+setuptools>=68.0.0
+pip>=23.2.0

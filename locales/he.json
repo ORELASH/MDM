@@ -1,0 +1,19 @@
+{
+  "app": {
+    "title": "מנהל רדשיפט",
+    "subtitle": "כלי ניהול Amazon Redshift",
+    "loading": "טוען...",
+    "success": "הצלחה",
+    "error": "שגיאה", 
+    "warning": "אזהרה"
+  },
+  "navigation": {
+    "home": "בית",
+    "clusters": "קלסטרים",
+    "users": "משתמשים", 
+    "roles": "תפקידים",
+    "permissions": "הרשאות",
+    "reports": "דוחות",
+    "settings": "הגדרות"
+  }
+}
