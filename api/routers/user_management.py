@@ -48,9 +48,9 @@ class PermissionLevel(str, Enum):
 
 # Pydantic models
 class CreateUserRequest(BaseModel):
-    username: str = Field(..., min_length=3, max_length=50, regex=r'^[a-zA-Z0-9_-]+$')
+    username: str = Field(..., min_length=3, max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
     password: Optional[str] = Field(None, min_length=8, max_length=100)
-    email: Optional[str] = Field(None, regex=r'^[^@]+@[^@]+\.[^@]+$')
+    email: Optional[str] = Field(None, pattern=r'^[^@]+@[^@]+\.[^@]+$')
     full_name: Optional[str] = Field(None, max_length=100)
     user_type: UserType = Field(default=UserType.NORMAL)
     server_id: int = Field(..., ge=1)
@@ -72,9 +72,9 @@ class CreateUserRequest(BaseModel):
         return v
 
 class UpdateUserRequest(BaseModel):
-    username: Optional[str] = Field(None, min_length=3, max_length=50, regex=r'^[a-zA-Z0-9_-]+$')
+    username: Optional[str] = Field(None, min_length=3, max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
     password: Optional[str] = Field(None, min_length=8, max_length=100)
-    email: Optional[str] = Field(None, regex=r'^[^@]+@[^@]+\.[^@]+$')
+    email: Optional[str] = Field(None, pattern=r'^[^@]+@[^@]+\.[^@]+$')
     full_name: Optional[str] = Field(None, max_length=100)
     user_type: Optional[UserType] = None
     status: Optional[UserStatus] = None
@@ -84,7 +84,7 @@ class UpdateUserRequest(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
 
 class BulkUserOperation(BaseModel):
-    operation: str = Field(..., regex=r'^(create|update|delete|activate|deactivate|assign_role|remove_role)$')
+    operation: str = Field(..., pattern=r'^(create|update|delete|activate|deactivate|assign_role|remove_role)$')
     user_ids: Optional[List[int]] = None
     usernames: Optional[List[str]] = None
     server_id: int = Field(..., ge=1)
@@ -94,7 +94,7 @@ class RoleAssignment(BaseModel):
     user_id: int = Field(..., ge=1)
     roles: List[str] = Field(..., min_items=1)
     server_id: int = Field(..., ge=1)
-    action: str = Field(..., regex=r'^(add|remove|replace)$')
+    action: str = Field(..., pattern=r'^(add|remove|replace)$')
 
 class UserResponse(BaseModel):
     id: int
@@ -582,7 +582,7 @@ async def manage_user_roles(role_assignment: RoleAssignment):
         logger.log_system_event(f"Role management failed: {e}", "ERROR")
         raise HTTPException(status_code=500, detail=f"Role management failed: {str(e)}")
 
-@router.get("/users/statistics", response_model=APIResponse)
+@router.get("/statistics", response_model=APIResponse)
 async def get_user_statistics():
     """
     Get comprehensive user statistics

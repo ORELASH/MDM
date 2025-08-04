@@ -72,22 +72,41 @@ class DatabaseManager:
                 # Split schema into individual statements to handle errors gracefully
                 statements = [stmt.strip() for stmt in schema_sql.split(';') if stmt.strip()]
                 
-                with self.get_cursor() as cursor:
+                conn = self._get_connection()
+                cursor = conn.cursor()
+                
+                try:
                     for statement in statements:
                         if statement.strip():
                             try:
-                                cursor.execute(statement)
+                                # Handle PRAGMA statements separately (they don't need transactions)
+                                if statement.strip().upper().startswith('PRAGMA'):
+                                    cursor.execute(statement)
+                                else:
+                                    cursor.execute(statement)
                             except (sqlite3.OperationalError, sqlite3.IntegrityError) as e:
+                                error_msg = str(e).lower()
                                 # Skip if already exists (for triggers, views, etc.)
-                                if "already exists" in str(e):
+                                if "already exists" in error_msg:
                                     continue
                                 # Skip duplicate data insertion
-                                elif "UNIQUE constraint failed" in str(e):
+                                elif "unique constraint failed" in error_msg:
+                                    continue
+                                # Skip transaction warnings for PRAGMA
+                                elif "no transaction is active" in error_msg:
+                                    continue
+                                # Skip incomplete input warnings
+                                elif "incomplete input" in error_msg:
                                     continue
                                 else:
                                     self.logger.warning(f"Schema statement warning: {e}")
                     
-                    cursor.connection.commit()
+                    conn.commit()
+                except Exception as e:
+                    conn.rollback()
+                    raise
+                finally:
+                    cursor.close()
                 
                 self.logger.info("Database initialized successfully")
             else:
@@ -112,13 +131,13 @@ class DatabaseManager:
                 server_config['name'],
                 server_config['host'],
                 server_config['port'],
-                server_config['database'],
+                server_config.get('database_name') or server_config.get('database'),
                 server_config.get('database_type', 'postgresql'),
                 server_config.get('username'),
                 server_config.get('password'),
                 server_config.get('environment', 'Development'),
                 json.dumps(server_config.get('scanner_settings', {})),
-                json.dumps(server_config.get('metadata', {}))
+                json.dumps(server_config.get('connection_metadata') or server_config.get('metadata', {}))
             ))
             
             server_id = cursor.lastrowid
@@ -205,6 +224,41 @@ class DatabaseManager:
                 "scan_date": scan_dict.get('created_at')
             }
     
+    def update_server(self, server_id: int, server_config: Dict[str, Any]) -> bool:
+        """Update server configuration"""
+        try:
+            with self.get_cursor() as cursor:
+                cursor.execute("""
+                    UPDATE servers 
+                    SET name = ?, host = ?, port = ?, database_name = ?, database_type = ?, 
+                        username = ?, password = ?, environment = ?, 
+                        scanner_settings = ?, connection_metadata = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (
+                    server_config['name'],
+                    server_config['host'],
+                    server_config['port'],
+                    server_config.get('database_name') or server_config.get('database'),
+                    server_config.get('database_type', 'postgresql'),
+                    server_config.get('username'),
+                    server_config.get('password'),
+                    server_config.get('environment', 'Development'),
+                    json.dumps(server_config.get('scanner_settings', {})),
+                    json.dumps(server_config.get('connection_metadata') or server_config.get('metadata', {})),
+                    server_id
+                ))
+                
+                if cursor.rowcount > 0:
+                    self.logger.info(f"Updated server ID {server_id}: {server_config['name']}")
+                    return True
+                else:
+                    self.logger.warning(f"No server found with ID {server_id}")
+                    return False
+                    
+        except Exception as e:
+            self.logger.error(f"Failed to update server {server_id}: {e}")
+            return False
+
     def update_server_status(self, server_id: int, status: str, last_test_at: Optional[datetime] = None):
         """Update server connection status"""
         with self.get_cursor() as cursor:
@@ -254,7 +308,20 @@ class DatabaseManager:
     def get_global_users(self) -> Dict[str, Any]:
         """Get unified global users across all servers"""
         with self.get_cursor() as cursor:
-            cursor.execute("SELECT * FROM global_users ORDER BY normalized_username")
+            cursor.execute("""
+                SELECT u.id, u.username, u.normalized_username, u.user_type, u.is_active, 
+                       u.last_login, u.created_at, u.discovered_at, u.metadata, u.permissions_data,
+                       s.name as server_name, s.database_type, s.environment,
+                       COUNT(DISTINCT s2.id) as appears_on_servers
+                FROM users u
+                JOIN servers s ON u.server_id = s.id
+                LEFT JOIN users u2 ON u.normalized_username = u2.normalized_username AND u2.id != u.id
+                LEFT JOIN servers s2 ON u2.server_id = s2.id
+                GROUP BY u.id, u.username, u.normalized_username, u.user_type, u.is_active, 
+                         u.last_login, u.created_at, u.discovered_at, u.metadata, u.permissions_data,
+                         s.name, s.database_type, s.environment
+                ORDER BY u.normalized_username
+            """)
             
             global_users = {}
             for row in cursor.fetchall():
@@ -269,9 +336,9 @@ class DatabaseManager:
                         'total_permissions': 0,
                         'is_active_somewhere': user_data['is_active'],
                         'user_types': {user_data['user_type']},
-                        'first_seen': user_data['discovered_at'],
+                        'first_seen': user_data.get('discovered_at') or user_data.get('created_at'),
                         'last_activity': user_data['last_login'],
-                        'appears_on_servers': user_data['appears_on_servers']
+                        'appears_on_servers': user_data.get('appears_on_servers', 1)
                     }
                 
                 # Add server-specific data
