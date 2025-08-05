@@ -5435,10 +5435,18 @@ def show_user_management_page():
 
 
 def show_module_manager_page():
-    """Show Module Manager page with full functionality"""
+    """Show Module Manager page with real functionality"""
     st.title("🔧 Module Manager")
     st.markdown("### System Modules and Extensions Management")
     st.markdown("---")
+
+    # Initialize module manager
+    try:
+        from core.module_manager import ModuleManager
+        module_manager = ModuleManager()
+    except Exception as e:
+        st.error(f"Failed to initialize Module Manager: {e}")
+        return
 
     # Module management tabs
     tab1, tab2, tab3, tab4 = st.tabs(
@@ -5446,63 +5454,110 @@ def show_module_manager_page():
     )
 
     with tab1:
-        st.subheader("📦 Installed Modules")
+        st.subheader("📦 Module Management")
 
-        # Sample module data
-        modules_data = [
-            {
-                "Name": "Alert System",
-                "Version": "1.2.0",
-                "Status": "🟢 Active",
-                "Type": "Core",
-                "Description": "Real-time monitoring and alerting",
-                "Last Updated": "2025-07-25",
-                "Dependencies": "pandas, requests",
-            },
-            {
-                "Name": "Backup Manager",
-                "Version": "1.1.5",
-                "Status": "🟢 Active",
-                "Type": "Core",
-                "Description": "Automated backup and restore",
-                "Last Updated": "2025-07-20",
-                "Dependencies": "boto3, zipfile",
-            },
-            {
-                "Name": "Sample Analytics",
-                "Version": "0.8.2",
-                "Status": "🟡 Warning",
-                "Type": "Extension",
-                "Description": "Analytics dashboard components",
-                "Last Updated": "2025-07-15",
-                "Dependencies": "plotly, numpy",
-            },
-            {
-                "Name": "Query Optimizer",
-                "Version": "2.0.1",
-                "Status": "🔴 Error",
-                "Type": "Extension",
-                "Description": "SQL query optimization tools",
-                "Last Updated": "2025-07-10",
-                "Dependencies": "sqlparse, psycopg2",
-            },
-            {
-                "Name": "Data Export",
-                "Version": "1.0.0",
-                "Status": "⚪ Disabled",
-                "Type": "Plugin",
-                "Description": "Export data to various formats",
-                "Last Updated": "2025-07-05",
-                "Dependencies": "openpyxl, csv",
-            },
-        ]
+        # Get installed and discovered modules
+        try:
+            installed_modules = module_manager.get_installed_modules()
+            discovered_modules = module_manager.discover_modules()
+        except Exception as e:
+            st.error(f"Failed to load modules: {e}")
+            return
+
+        # Display installed modules
+        if installed_modules:
+            st.markdown("#### ✅ Installed Modules")
+            
+            for module in installed_modules:
+                with st.container():
+                    col1, col2, col3, col4 = st.columns([3, 1, 1, 2])
+                    
+                    with col1:
+                        status_icon = {
+                            'active': '🟢',
+                            'disabled': '⚪',
+                            'error': '🔴'
+                        }.get(module['status'], '🟡')
+                        
+                        st.markdown(f"**{module['name']}** {status_icon}")
+                        st.caption(f"v{module['version']} | {module['module_type']}")
+                        if module['description']:
+                            st.caption(module['description'][:80] + "..." if len(module['description']) > 80 else module['description'])
+                    
+                    with col2:
+                        st.caption("Status")
+                        st.write(module['status'].title())
+                    
+                    with col3:
+                        st.caption("Installed")
+                        st.write(module['installed_at'][:10] if module['installed_at'] else "Unknown")
+                    
+                    with col4:
+                        col_btn1, col_btn2 = st.columns(2)
+                        
+                        with col_btn1:
+                            if st.button("⚙️", key=f"config_{module['name']}", help="Configure"):
+                                st.session_state.selected_module = module['name']
+                                st.session_state.active_tab = 1  # Switch to configuration tab
+                        
+                        with col_btn2:
+                            if st.button("🗑️", key=f"uninstall_{module['name']}", help="Uninstall"):
+                                if st.session_state.get(f"confirm_uninstall_{module['name']}", False):
+                                    result = module_manager.uninstall_module(module['name'])
+                                    if result['success']:
+                                        st.success(result['message'])
+                                        st.rerun()
+                                    else:
+                                        st.error(result['error'])
+                                else:
+                                    st.session_state[f"confirm_uninstall_{module['name']}"] = True
+                                    st.warning(f"Click again to confirm uninstalling {module['name']}")
+                    
+                    st.markdown("---")
+        else:
+            st.info("No modules installed yet")
+
+        # Display available modules for installation
+        available_modules = [m for m in discovered_modules if not m.get('is_installed', False)]
         
-        # Clear demo data
-        modules_data = []
-
-        # Real module data only
-        st.info("Installed modules will appear here after module installation")
-        st.info("Install modules to see their status, versions, and dependencies")
+        if available_modules:
+            st.markdown("#### 📥 Available Modules")
+            
+            for module in available_modules:
+                with st.container():
+                    col1, col2, col3 = st.columns([4, 1, 1])
+                    
+                    with col1:
+                        loadable_icon = "✅" if module.get('is_loadable', False) else "❌"
+                        st.markdown(f"**{module['name']}** {loadable_icon}")
+                        st.caption(f"v{module['version']} | {module.get('type', 'extension')}")
+                        if module.get('description'):
+                            st.caption(module['description'][:80] + "..." if len(module['description']) > 80 else module['description'])
+                        
+                        # Show dependencies
+                        if module.get('dependencies'):
+                            deps_text = ", ".join(module['dependencies'])
+                            st.caption(f"📦 Dependencies: {deps_text}")
+                    
+                    with col2:
+                        st.caption("Loadable")
+                        st.write("Yes" if module.get('is_loadable', False) else "No")
+                    
+                    with col3:
+                        if module.get('is_loadable', False):
+                            if st.button("📥 Install", key=f"install_{module['name']}"):
+                                result = module_manager.install_module(module['name'])
+                                if result['success']:
+                                    st.success(result['message'])
+                                    st.rerun()
+                                else:
+                                    st.error(result['error'])
+                        else:
+                            st.button("❌ Cannot Install", key=f"cannot_install_{module['name']}", disabled=True)
+                    
+                    st.markdown("---")
+        else:
+            st.info("No additional modules available for installation")
 
         # Module actions
         st.markdown("### 🛠️ Module Actions")
@@ -5514,69 +5569,253 @@ def show_module_manager_page():
                 st.rerun()
 
         with col2:
-            if st.button("➕ Install Module", use_container_width=True):
-                st.info("Module installation dialog would open here")
+            if st.button("📊 View Dependencies", use_container_width=True):
+                st.session_state.show_dependencies = True
 
         with col3:
-            if st.button("🗑️ Uninstall Module", use_container_width=True):
-                st.warning("Module uninstall confirmation would appear here")
+            if st.button("🔍 Module Details", use_container_width=True):
+                st.session_state.show_module_details = True
 
         with col4:
-            if st.button("📊 View Dependencies", use_container_width=True):
-                st.info("Dependency graph would display here")
+            if st.button("🔧 System Info", use_container_width=True):
+                st.session_state.show_system_info = True
+
+        # Show dependency information if requested
+        if st.session_state.get('show_dependencies', False):
+            st.markdown("### 📊 Module Dependencies")
+            
+            for module in installed_modules:
+                with st.expander(f"Dependencies for {module['name']}"):
+                    dep_info = module_manager.get_module_dependencies(module['name'])
+                    if dep_info['success']:
+                        if dep_info['dependencies']:
+                            for dep, status in dep_info['dependency_status'].items():
+                                icon = "✅" if status['available'] else "❌"
+                                st.write(f"{icon} {dep}")
+                                if not status['available']:
+                                    st.caption(f"Error: {status['error']}")
+                        else:
+                            st.info("No dependencies")
+                    else:
+                        st.error(dep_info['error'])
+            
+            if st.button("Close Dependencies"):
+                st.session_state.show_dependencies = False
+                st.rerun()
 
     with tab2:
         st.subheader("⚙️ Module Configuration")
 
-        selected_module = st.selectbox(
-            "Select Module:",
-            [
-                "Alert System",
-                "Backup Manager",
-                "Sample Analytics",
-                "Query Optimizer",
-                "Data Export",
-            ],
-        )
+        # Get installed modules for configuration
+        if not installed_modules:
+            st.info("No installed modules to configure")
+        else:
+            # Select module to configure
+            module_names = [m['name'] for m in installed_modules]
+            selected_module_name = st.selectbox(
+                "Select Module to Configure:",
+                module_names,
+                index=module_names.index(st.session_state.get('selected_module', module_names[0])) if st.session_state.get('selected_module') in module_names else 0
+            )
 
-        col1, col2 = st.columns([2, 1])
+            if selected_module_name:
+                # Get current configuration
+                config_result = module_manager.get_module_config(selected_module_name)
+                current_config = config_result.get('configs', {}) if config_result['success'] else {}
+                
+                col1, col2 = st.columns([2, 1])
 
-        with col1:
-            st.markdown(f"#### Configuration for {selected_module}")
+                with col1:
+                    st.markdown(f"#### Configuration for {selected_module_name}")
 
-            if selected_module == "Alert System":
-                st.markdown("##### Email Settings")
-                _smtp_server = st.text_input("SMTP Server", value="smtp.company.com")
-                _smtp_port = st.number_input("SMTP Port", value=587)
-                _email_user = st.text_input(
-                    "Email Username", value="alerts@company.com"
-                )
+                    # Dynamic configuration based on module type
+                    selected_module_info = next((m for m in installed_modules if m['name'] == selected_module_name), None)
+                    
+                    if selected_module_info:
+                        st.caption(f"Module Type: {selected_module_info['module_type']}")
+                        st.caption(f"Version: {selected_module_info['version']}")
+                        
+                        # Common configuration options
+                        st.markdown("##### General Settings")
+                        
+                        enabled = st.checkbox(
+                            "Module Enabled", 
+                            value=current_config.get('enabled', True),
+                            key=f"enabled_{selected_module_name}"
+                        )
+                        
+                        log_level = st.selectbox(
+                            "Log Level",
+                            ["DEBUG", "INFO", "WARNING", "ERROR"],
+                            index=["DEBUG", "INFO", "WARNING", "ERROR"].index(current_config.get('log_level', 'INFO')),
+                            key=f"log_level_{selected_module_name}"
+                        )
+                        
+                        # Module-specific configuration
+                        if selected_module_name.lower() == "alerts" or "alert" in selected_module_name.lower():
+                            st.markdown("##### Alert Settings")
+                            
+                            smtp_server = st.text_input(
+                                "SMTP Server", 
+                                value=current_config.get('smtp_server', 'localhost'),
+                                key=f"smtp_server_{selected_module_name}"
+                            )
+                            
+                            smtp_port = st.number_input(
+                                "SMTP Port", 
+                                min_value=1, max_value=65535,
+                                value=current_config.get('smtp_port', 587),
+                                key=f"smtp_port_{selected_module_name}"
+                            )
+                            
+                            email_from = st.text_input(
+                                "From Email", 
+                                value=current_config.get('email_from', 'alerts@multidbmanager.local'),
+                                key=f"email_from_{selected_module_name}"
+                            )
+                            
+                            st.markdown("##### Alert Thresholds")
+                            cpu_threshold = st.slider(
+                                "CPU Alert (%)", 0, 100, 
+                                value=current_config.get('cpu_threshold', 80),
+                                key=f"cpu_threshold_{selected_module_name}"
+                            )
+                            
+                            memory_threshold = st.slider(
+                                "Memory Alert (%)", 0, 100, 
+                                value=current_config.get('memory_threshold', 85),
+                                key=f"memory_threshold_{selected_module_name}"
+                            )
+                            
+                            disk_threshold = st.slider(
+                                "Disk Usage Alert (%)", 0, 100, 
+                                value=current_config.get('disk_threshold', 90),
+                                key=f"disk_threshold_{selected_module_name}"
+                            )
 
-                st.markdown("##### Alert Thresholds")
-                _cpu_threshold = st.slider("CPU Alert (%)", 0, 100, 80)
-                _memory_threshold = st.slider("Memory Alert (%)", 0, 100, 85)
-                _disk_threshold = st.slider("Disk Usage Alert (%)", 0, 100, 90)
+                        elif selected_module_name.lower() == "backup" or "backup" in selected_module_name.lower():
+                            st.markdown("##### Backup Settings")
+                            
+                            backup_interval = st.selectbox(
+                                "Backup Frequency", 
+                                ["hourly", "daily", "weekly", "monthly"],
+                                index=["hourly", "daily", "weekly", "monthly"].index(current_config.get('backup_interval', 'daily')),
+                                key=f"backup_interval_{selected_module_name}"
+                            )
+                            
+                            retention_days = st.number_input(
+                                "Retention Days", 
+                                min_value=1, max_value=365, 
+                                value=current_config.get('retention_days', 30),
+                                key=f"retention_days_{selected_module_name}"
+                            )
+                            
+                            compression = st.checkbox(
+                                "Enable Compression", 
+                                value=current_config.get('compression', True),
+                                key=f"compression_{selected_module_name}"
+                            )
 
-            elif selected_module == "Backup Manager":
-                st.markdown("##### Backup Settings")
-                _backup_interval = st.selectbox(
-                    "Backup Frequency", ["Hourly", "Daily", "Weekly", "Monthly"]
-                )
-                _retention_days = st.number_input(
-                    "Retention Days", min_value=1, max_value=365, value=30
-                )
-                _compression = st.checkbox("Enable Compression", value=True)
+                            st.markdown("##### Storage Settings")
+                            backup_location = st.text_input(
+                                "Backup Location", 
+                                value=current_config.get('backup_location', '/backup/multidb'),
+                                key=f"backup_location_{selected_module_name}"
+                            )
+                            
+                            cloud_backup = st.checkbox(
+                                "Enable Cloud Backup", 
+                                value=current_config.get('cloud_backup', False),
+                                key=f"cloud_backup_{selected_module_name}"
+                            )
 
-                st.markdown("##### Storage")
-                _backup_location = st.text_input(
-                    "Backup Location", value="/backup/redshift"
-                )
-                _cloud_backup = st.checkbox("Cloud Backup", value=False)
+                        else:
+                            st.markdown("##### Custom Configuration")
+                            st.info(f"Module-specific configuration for {selected_module_name}")
+                            
+                            # Allow adding custom config keys
+                            st.markdown("##### Add Custom Configuration")
+                            new_key = st.text_input("Configuration Key", key=f"new_key_{selected_module_name}")
+                            new_value = st.text_input("Configuration Value", key=f"new_value_{selected_module_name}")
+                            value_type = st.selectbox("Value Type", ["string", "integer", "boolean", "json"], key=f"new_type_{selected_module_name}")
+                            
+                            if st.button("Add Configuration", key=f"add_config_{selected_module_name}"):
+                                if new_key and new_value:
+                                    result = module_manager.set_module_config(selected_module_name, new_key, new_value, value_type)
+                                    if result['success']:
+                                        st.success(result['message'])
+                                        st.rerun()
+                                    else:
+                                        st.error(result['error'])
 
-            else:
-                st.info(
-                    f"Configuration options for {selected_module} would appear here"
-                )
+                        # Save configuration button
+                        if st.button("💾 Save Configuration", key=f"save_config_{selected_module_name}"):
+                            try:
+                                # Save all configuration values
+                                configs_to_save = {
+                                    'enabled': enabled,
+                                    'log_level': log_level
+                                }
+                                
+                                # Add module-specific configs
+                                if selected_module_name.lower() == "alerts" or "alert" in selected_module_name.lower():
+                                    configs_to_save.update({
+                                        'smtp_server': smtp_server,
+                                        'smtp_port': smtp_port,
+                                        'email_from': email_from,
+                                        'cpu_threshold': cpu_threshold,
+                                        'memory_threshold': memory_threshold,
+                                        'disk_threshold': disk_threshold
+                                    })
+                                elif selected_module_name.lower() == "backup" or "backup" in selected_module_name.lower():
+                                    configs_to_save.update({
+                                        'backup_interval': backup_interval,
+                                        'retention_days': retention_days,
+                                        'compression': compression,
+                                        'backup_location': backup_location,
+                                        'cloud_backup': cloud_backup
+                                    })
+                                
+                                # Save each config
+                                all_success = True
+                                for key, value in configs_to_save.items():
+                                    data_type = "boolean" if isinstance(value, bool) else "integer" if isinstance(value, int) else "string"
+                                    result = module_manager.set_module_config(selected_module_name, key, value, data_type)
+                                    if not result['success']:
+                                        all_success = False
+                                        st.error(f"Failed to save {key}: {result['error']}")
+                                        break
+                                
+                                if all_success:
+                                    st.success("Configuration saved successfully!")
+                                    
+                            except Exception as e:
+                                st.error(f"Failed to save configuration: {e}")
+
+                with col2:
+                    st.markdown("#### Current Configuration")
+                    
+                    if current_config:
+                        for key, value in current_config.items():
+                            st.code(f"{key}: {value}")
+                    else:
+                        st.info("No configuration set")
+                        
+                    st.markdown("#### Actions")
+                    
+                    if st.button("🔄 Reset to Defaults", key=f"reset_{selected_module_name}"):
+                        st.warning("Reset functionality would remove all custom configuration")
+                        
+                    if st.button("📋 Export Config", key=f"export_{selected_module_name}"):
+                        if current_config:
+                            st.download_button(
+                                "Download Configuration",
+                                data=json.dumps(current_config, indent=2),
+                                file_name=f"{selected_module_name}_config.json",
+                                mime="application/json"
+                            )
+                        else:
+                            st.info("No configuration to export")
 
         with col2:
             st.markdown("#### Module Info")
@@ -5603,147 +5842,273 @@ def show_module_manager_page():
 
     with tab3:
         st.subheader("📊 Module Status")
-
-        # Status overview
-        col1, col2, col3, col4 = st.columns(4)
-
-        with col1:
-            st.info("Module status available after installation")
-
-        with col2:
-            st.info("Module monitoring coming soon")
-
-        with col3:
-            st.info("Error tracking available after usage")
-
-        with col4:
-            st.info("Module states managed here")
-
-        # Module health chart
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("#### 📈 Module Performance")
-            perf_data = pd.DataFrame(
-                {
-                    "Module": [
-                        "Alert System",
-                        "Backup Manager",
-                        "Sample Analytics",
-                        "Query Optimizer",
-                    ],
-                    "CPU_Usage": [12, 8, 25, 45],
-                    "Memory_MB": [64, 32, 128, 256],
-                }
-            )
-
-            fig = go.Figure()
-            fig.add_trace(
-                go.Bar(name="CPU %", x=perf_data["Module"], y=perf_data["CPU_Usage"])
-            )
-            fig.update_layout(title="CPU Usage by Module", height=300)
-            st.info("Chart will appear here after real data collection")
-
-        with col2:
-            st.markdown("#### 💾 Memory Usage")
-            fig = go.Figure()
-            fig.add_trace(
-                go.Bar(
-                    name="Memory MB",
-                    x=perf_data["Module"],
-                    y=perf_data["Memory_MB"],
-                    marker_color="lightgreen",
-                )
-            )
-            fig.update_layout(title="Memory Usage by Module", height=300)
-            st.info("Chart will appear here after real data collection")
-
-        # Module logs
-        st.markdown("#### 📋 Recent Module Activity")
-        activity_data = [
-            {
-                "Time": "15:30",
-                "Module": "Alert System",
-                "Event": "CPU alert triggered",
-                "Level": "⚠️ Warning",
-            },
-            {
-                "Time": "15:25",
-                "Module": "Backup Manager",
-                "Event": "Backup completed",
-                "Level": "✅ Info",
-            },
-            {
-                "Time": "15:20",
-                "Module": "Sample Analytics",
-                "Event": "Dashboard refreshed",
-                "Level": "✅ Info",
-            },
-            {
-                "Time": "15:15",
-                "Module": "Query Optimizer",
-                "Event": "Optimization failed",
-                "Level": "🔴 Error",
-            },
-            {
-                "Time": "15:10",
-                "Module": "Alert System",
-                "Event": "Email sent successfully",
-                "Level": "✅ Info",
-            },
-        ]
-
-        st.info("Real activity will appear here after system usage")
-        st.info("System actions and database operations will be logged here")
+        
+        if not installed_modules:
+            st.info("No installed modules to monitor")
+        else:
+            # Status overview
+            st.markdown("#### System Overview")
+            
+            total_modules = len(installed_modules)
+            active_modules = len([m for m in installed_modules if m['status'] == 'active'])
+            error_modules = len([m for m in installed_modules if m['status'] == 'error'])
+            disabled_modules = len([m for m in installed_modules if m['status'] == 'disabled'])
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric("Total Modules", total_modules)
+                
+            with col2:
+                st.metric("Active", active_modules, delta=None)
+                
+            with col3:
+                st.metric("Errors", error_modules, delta=None if error_modules == 0 else f"-{error_modules}")
+                
+            with col4:
+                st.metric("Disabled", disabled_modules)
+            
+            # Detailed status for each module
+            st.markdown("#### Detailed Status")
+            
+            for module in installed_modules:
+                with st.expander(f"{module['name']} - {module['status'].title()}", expanded=module['status'] == 'error'):
+                    col1, col2 = st.columns([2, 1])
+                    
+                    with col1:
+                        st.write(f"**Version:** {module['version']}")
+                        st.write(f"**Type:** {module['module_type']}")
+                        st.write(f"**Installed:** {module['installed_at'][:19] if module['installed_at'] else 'Unknown'}")
+                        
+                        if module['last_loaded_at']:
+                            st.write(f"**Last Loaded:** {module['last_loaded_at'][:19]}")
+                        
+                        if module['load_errors']:
+                            st.error(f"**Load Errors:** {module['load_errors']}")
+                            
+                        # Get detailed status
+                        detailed_status = module_manager.get_module_status(module['name'])
+                        if detailed_status.get('exists'):
+                            if detailed_status.get('is_loadable'):
+                                st.success("✅ Module is loadable")
+                            else:
+                                st.error("❌ Module has loading issues")
+                                
+                            # Show dependencies status
+                            dep_info = module_manager.get_module_dependencies(module['name'])
+                            if dep_info['success'] and dep_info.get('dependencies'):
+                                st.write("**Dependencies:**")
+                                for dep, status in dep_info['dependency_status'].items():
+                                    icon = "✅" if status['available'] else "❌"
+                                    st.write(f"  {icon} {dep}")
+                    
+                    with col2:
+                        # Module actions
+                        current_status = module['status']
+                        
+                        if current_status == 'active':
+                            if st.button("⏸️ Disable", key=f"disable_{module['name']}"):
+                                result = module_manager.update_module_status(module['name'], 'disabled')
+                                if result['success']:
+                                    st.success(result['message'])
+                                    st.rerun()
+                                else:
+                                    st.error(result['error'])
+                        else:
+                            if st.button("▶️ Enable", key=f"enable_{module['name']}"):
+                                result = module_manager.update_module_status(module['name'], 'active')
+                                if result['success']:
+                                    st.success(result['message'])
+                                    st.rerun()
+                                else:
+                                    st.error(result['error'])
+                        
+                        if st.button("🔄 Test Load", key=f"test_load_{module['name']}"):
+                            result = module_manager.load_module(module['name'])
+                            if result['success']:
+                                st.success("Module loaded successfully!")
+                            else:
+                                st.error(f"Load failed: {result['error']}")
+                        
+                        if st.button("ℹ️ Details", key=f"details_{module['name']}"):
+                            st.session_state[f"show_details_{module['name']}"] = True
+                        
+                        # Show details if requested
+                        if st.session_state.get(f"show_details_{module['name']}", False):
+                            st.markdown("**Metadata:**")
+                            if module.get('metadata'):
+                                metadata = json.loads(module['metadata']) if isinstance(module['metadata'], str) else module['metadata']
+                                for key, value in metadata.items():
+                                    st.caption(f"{key}: {value}")
+                            
+                            if st.button("Hide Details", key=f"hide_details_{module['name']}"):
+                                st.session_state[f"show_details_{module['name']}"] = False
+                                st.rerun()
 
     with tab4:
         st.subheader("🔄 Module Operations")
-
-        col1, col2 = st.columns(2)
-
+        
+        # Bulk operations
+        st.markdown("#### Bulk Operations")
+        
+        col1, col2, col3 = st.columns(3)
+        
         with col1:
-            st.markdown("#### 🚀 Quick Operations")
-
-            if st.button("🔄 Restart All Modules", use_container_width=True):
-                with st.spinner("Restarting modules..."):
-                    time.sleep(2)
-                    st.success("All modules restarted successfully!")
-
-            if st.button("🧹 Clear Module Logs", use_container_width=True):
-                st.info("Module logs cleared")
-
-            if st.button("📊 Generate Report", use_container_width=True):
-                st.success("Module report generated")
-
-            if st.button("🔍 Run Diagnostics", use_container_width=True):
-                with st.spinner("Running diagnostics..."):
-                    time.sleep(1.5)
-                    st.success("✅ All diagnostics passed")
-
+            if st.button("🔄 Refresh All Modules", use_container_width=True):
+                try:
+                    discovered = module_manager.discover_modules()
+                    st.success(f"Discovered {len(discovered)} modules")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Failed to refresh: {e}")
+        
         with col2:
-            st.markdown("#### 📦 Module Installation")
-
-            with st.form("install_module_form"):
-                st.markdown("Install New Module")
-
-                install_method = st.radio(
-                    "Installation Method",
-                    ["Upload File", "From Repository", "From URL"],
-                )
-
-                if install_method == "Upload File":
-                    _uploaded_file = st.file_uploader(
-                        "Choose module file", type=["zip", "tar.gz"]
-                    )
-                elif install_method == "From Repository":
-                    _module_name = st.text_input(
-                        "Module Name", placeholder="module-name"
-                    )
+            if st.button("⏸️ Disable All Modules", use_container_width=True):
+                if st.session_state.get('confirm_disable_all', False):
+                    try:
+                        for module in installed_modules:
+                            module_manager.update_module_status(module['name'], 'disabled')
+                        st.success("All modules disabled")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Failed to disable all: {e}")
                 else:
-                    _module_url = st.text_input("Module URL", placeholder="https://...")
+                    st.session_state.confirm_disable_all = True
+                    st.warning("Click again to confirm disabling all modules")
+        
+        with col3:
+            if st.button("▶️ Enable All Modules", use_container_width=True):
+                try:
+                    for module in installed_modules:
+                        module_manager.update_module_status(module['name'], 'active')
+                    st.success("All modules enabled")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Failed to enable all: {e}")
+        
+        # System information
+        st.markdown("#### System Information")
+        
+        with st.expander("📊 Module System Stats"):
+            st.write("**Module Directory:** `modules/`")
+            st.write(f"**Database:** `{module_manager.db_path}`")
+            
+            # Check database connectivity
+            try:
+                test_modules = module_manager.get_installed_modules()
+                st.success(f"✅ Database connected - {len(test_modules)} installed modules")
+            except Exception as e:
+                st.error(f"❌ Database connection failed: {e}")
+            
+            # Check modules directory
+            if module_manager.modules_dir.exists():
+                module_dirs = [d for d in module_manager.modules_dir.iterdir() if d.is_dir() and not d.name.startswith('.')]
+                st.success(f"✅ Modules directory found - {len(module_dirs)} module directories")
+            else:
+                st.error("❌ Modules directory not found")
+        
+        # Advanced operations
+        st.markdown("#### Advanced Operations")
+        
+        with st.expander("🔧 Advanced Module Management"):
+            st.warning("⚠️ Advanced operations - use with caution")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                if st.button("🗑️ Clean Module Database"):
+                    if st.session_state.get('confirm_clean_db', False):
+                        try:
+                            # This would clean orphaned entries
+                            st.info("Database cleaning functionality would be implemented here")
+                        except Exception as e:
+                            st.error(f"Failed to clean database: {e}")
+                    else:
+                        st.session_state.confirm_clean_db = True
+                        st.warning("Click again to confirm database cleanup")
+            
+            with col2:
+                if st.button("📊 Export Module Registry"):
+                    try:
+                        registry_data = {
+                            'installed_modules': module_manager.get_installed_modules(),
+                            'discovered_modules': module_manager.discover_modules(),
+                            'export_timestamp': datetime.now().isoformat()
+                        }
+                        
+                        st.download_button(
+                            "Download Module Registry",
+                            data=json.dumps(registry_data, indent=2),
+                            file_name=f"module_registry_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                            mime="application/json"
+                        )
+                    except Exception as e:
+                        st.error(f"Failed to export registry: {e}")
+        
+        # Module development tools
+        with st.expander("🛠️ Module Development Tools"):
+            st.markdown("##### Create New Module Template")
+            
+            new_module_name = st.text_input("Module Name")
+            new_module_type = st.selectbox("Module Type", ["core", "extension", "plugin"])
+            new_module_version = st.text_input("Version", value="1.0.0")
+            new_module_description = st.text_area("Description")
+            
+            if st.button("🎯 Create Module Template"):
+                if new_module_name:
+                    module_path = module_manager.modules_dir / new_module_name
+                    try:
+                        module_path.mkdir(exist_ok=True)
+                        
+                        # Create module.json
+                        module_config = {
+                            "name": new_module_name,
+                            "version": new_module_version,
+                            "type": new_module_type,
+                            "description": new_module_description,
+                            "main_file": "__init__.py",
+                            "dependencies": [],
+                            "author": "MultiDBManager",
+                            "created": datetime.now().isoformat()
+                        }
+                        
+                        with open(module_path / "module.json", 'w') as f:
+                            json.dump(module_config, f, indent=2)
+                        
+                        # Create basic __init__.py
+                        init_content = f'''"""
+{new_module_name} Module
+{new_module_description}
+"""
 
-                if st.form_submit_button("📥 Install Module"):
-                    st.success("Module installed successfully!")
+__version__ = "{new_module_version}"
+__author__ = "MultiDBManager"
+
+def initialize():
+    """Initialize the module"""
+    print(f"Initializing {{__name__}} module v{{__version__}}")
+    return True
+
+def get_info():
+    """Get module information"""
+    return {{
+        "name": "{new_module_name}",
+        "version": __version__,
+        "description": "{new_module_description}",
+        "type": "{new_module_type}"
+    }}
+'''
+                        
+                        with open(module_path / "__init__.py", 'w') as f:
+                            f.write(init_content)
+                        
+                        st.success(f"Module template created at {module_path}")
+                        st.info("You can now develop your module and install it using the Modules tab")
+                        
+                    except Exception as e:
+                        st.error(f"Failed to create module template: {e}")
+                else:
+                    st.warning("Please enter a module name")
 
 
 def show_settings_page():

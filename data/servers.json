@@ -11,8 +11,8 @@
     "Last Test": "Just now",
     "last_scan": "Just now",
     "scanner_settings": {
-      "enabled": false,
-      "scan_interval": 24,
+      "enabled": true,
+      "scan_interval": 1,
       "detect_manual_users": true,
       "alert_on_new_users": true,
       "auto_lock_manual_users": false,

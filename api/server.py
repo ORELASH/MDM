@@ -60,37 +60,32 @@ class APIServer:
         
         self.server = uvicorn.Server(config)
         
-        self.logger.log_action_start(
-            f"Starting FastAPI server on {self.host}:{self.port}",
-            {
-                "host": self.host,
-                "port": self.port,
-                "workers": self.workers,
-                "docs_url": f"http://{self.host}:{self.port}/docs"
-            }
+        self.logger.log_system_event(
+            f"Starting FastAPI server on {self.host}:{self.port} - docs: http://{self.host}:{self.port}/docs",
+            "INFO"
         )
         
         try:
             await self.server.serve()
         except Exception as e:
-            self.logger.log_error(f"Server error: {e}")
+            self.logger.log_system_event(f"Server error: {e}", "ERROR")
             raise
         finally:
-            self.logger.log_action_end("FastAPI server stopped")
+            self.logger.log_system_event("FastAPI server stopped", "INFO")
     
     def start(self):
         """Start server synchronously"""
         try:
             asyncio.run(self.start_async())
         except KeyboardInterrupt:
-            self.logger.log_action_end("Server stopped by user interrupt")
+            self.logger.log_system_event("Server stopped by user interrupt", "INFO")
         except Exception as e:
-            self.logger.log_error(f"Failed to start server: {e}")
+            self.logger.log_system_event(f"Failed to start server: {e}", "ERROR")
             raise
     
     def start_dev(self):
         """Start development server with hot reload"""
-        self.logger.log_action_start("Starting development server with hot reload")
+        self.logger.log_system_event("Starting development server with hot reload", "INFO")
         
         uvicorn.run(
             "api.main:app",

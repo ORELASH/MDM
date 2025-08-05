@@ -27,6 +27,7 @@ from api.routers.servers import router as servers_router
 from api.routers.users import router as users_router
 from api.routers.query import router as query_router
 from api.routers.user_management import router as user_management_router
+from api.routers.modules import router as modules_router
 
 # Initialize logger (simple fallback)
 try:
@@ -92,7 +93,8 @@ async def root():
                 "/servers/*", 
                 "/users/*",
                 "/query/*",
-                "/user-management/*"
+                "/user-management/*",
+                "/modules/*"
             ]
         }
     )
@@ -133,7 +135,7 @@ async def get_system_status():
             "authentication_enabled": False,
             "uptime": "running",
             "version": "1.0.0",
-            "endpoints_available": 5
+            "endpoints_available": 6
         }
         
         return APIResponse(
@@ -152,6 +154,7 @@ app.include_router(servers_router)
 app.include_router(users_router)
 app.include_router(query_router)
 app.include_router(user_management_router)
+app.include_router(modules_router)
 
 # Error handlers
 @app.exception_handler(HTTPException)
@@ -198,6 +201,7 @@ async def startup_event():
     print("   • /users/* - User management")
     print("   • /query/* - SQL query execution")
     print("   • /user-management/* - Advanced user management with CRUD operations")
+    print("   • /modules/* - Module management and configuration")
 
 # Shutdown event
 @app.on_event("shutdown")
